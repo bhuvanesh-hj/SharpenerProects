@@ -16,7 +16,7 @@ const myform = document.querySelector('#my-form');
 const nameInput = document.querySelector('#name');
 const emailInput = document.querySelector('#email');
 // const msg = document.querySelector('.msg');
-// const userList = document.querySelector('#users');
+const userList = document.querySelector('#users');
 
 myform.addEventListener('submit',onsubmit);
 
@@ -39,8 +39,13 @@ function onsubmit(e){
 
     let myObj_serialized=JSON.stringify(myObj);
 
-     localStorage.setItem('myobj',myObj_serialized);
+     localStorage.setItem(emailInput.value,myObj_serialized);
     alert('Submitted');
+    let li =document.createElement('li');
+    li.className='items';
+    li.appendChild(document.createTextNode(`Name: ${nameInput.value} , Email: ${emailInput.value}`));
+    userList.appendChild(li);
+    console.log('myObj_serialized');
     nameInput.value='';
     emailInput.value='';
 }
