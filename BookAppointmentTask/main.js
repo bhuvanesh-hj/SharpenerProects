@@ -29,8 +29,17 @@ function onsubmit(e){
     // userList.appendChild(li);
     // console.log(nameInput.value);
     // console.log(emailInput.value);
-    localStorage.setItem(nameInput.value,'userName');
-    localStorage.setItem(emailInput.value,'userEmail');
+    // localStorage.setItem(nameInput.value,'userName');
+    // localStorage.setItem(emailInput.value,'userEmail');
+
+    let myObj={
+        User_Name : nameInput.value,
+        User_Email : emailInput.value
+    };
+
+    let myObj_serialized=JSON.stringify(myObj);
+
+     localStorage.setItem('myobj',myObj_serialized);
     alert('Submitted');
     nameInput.value='';
     emailInput.value='';
