@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+<script>
+    console.log('Person1-->Shows ticket')
+    console.log('Person2-->Shows ticket')
+    // let Person3 = async ()=>{
+    //     const wifeBringsTicket = new Promise((reslove,reject)=>{
+    //         setTimeout(()=>{
+    //             reslove('ticket');
+    //         },3000)
+    
+    //     });
+    //     const needPopcorn = new Promise((reslove,reject)=>{
+    //         reslove('Popcorn')
+    //     });
+    //     const needButter = new Promise((resolve, reject) => {
+    //         resolve('butter');
+    //     })
+    //     const getColdDrinks = new Promise((resolve, reject) => {
+    //         resolve('coldDrinks')
+    //     })
+    //     let ticket = await wifeBringsTicket;
+    //     console.log('wife--> i have a tickets');
+    //     console.log('husband--> Lets go');
+    //     console.log('wife--> wait i need popcorn')
+    //     let Popcorn = await needPopcorn;
+    //     console.log(`husband--> I got some ${Popcorn}`)
+    //     console.log('husband--> we should go!')
+    //     console.log('wife--> I need butter on my popcorn')
+    //     let butter = await needButter;
+    //     console.log(`husband--> I got some ${butter} on popcorn`)
+    //     console.log('husband--> anything else darling?');
+    //     console.log('wife--> I need some coldrinks')
+    //     let coldDrinks = await getColdDrinks;
+    //     console.log('husband--> I got some coldDrinks');
+    //     console.log('husband--> anything else darling?');
+    //     console.log('wife--> lets go now')
+    //     return ticket;
+    // }
+    // Person3().then((t)=>{
+    //     console.log(`Person3-->Shows ${t}`)
+    // })
+        const wifeBringsTicket = new Promise((resolve, reject) => {
+            setTimeout(()=>{
+                resolve('ticket')
+            },3000)
+        })
+
+        const needPopcorn = wifeBringsTicket.then((t)=>{
+            console.log('wife--> i have a tickets');
+        console.log('husband--> Lets go');
+        console.log('wife--> wait i need popcorn')
+        return new Promise((resolve, reject) => {
+            resolve(`${t} Popcorn`)
+        });
+        })
+
+        const needButter = needPopcorn.then((t)=>{
+            console.log(`husband--> I got some Popcorn`)
+            console.log('husband--> we should go!')
+            console.log('wife--> I need butter on my popcorn')
+            return new Promise((resolve, reject) => {
+                resolve(`${t} Butter`)
+            })
+        })
+        const getColdDrinks=needButter.then((t)=>{
+            console.log(`husband--> I got some butter on popcorn`)
+            console.log('husband--> anything else darling?');
+            console.log('wife--> I need some coldrinks')
+            return new Promise((resolve, reject) => {
+                resolve(`${t} ColdDrinks`)
+            })
+        })
+
+        getColdDrinks.then((t)=>{
+            console.log('husband--> I got some coldDrinks');
+            console.log('husband--> anything else darling?');
+            console.log('wife--> lets go now')
+            console.log(t)
+        })
+    console.log('Person4-->Shows ticket')
+    console.log('Person5-->Shows ticket')
+    
+</script>
+</body>
+</html>
