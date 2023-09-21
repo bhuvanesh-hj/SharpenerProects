@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    
+</head>
+<body>
+    <form onsubmit="saveto(event)" >
+        <label >Name</label>
+        <input type="text" name="username" id="userName">
+        <label >Email</label>
+        <input type="email" id="email" name="emailId">
+        <label >Phone Number</label>
+        <input type="tel" id="phoneNumber" name="phone">
+        <button type="submit">Submit</button>
+    </form>
+    <ul id="listOfUsers"></ul>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    var editing = null;
+    function saveto(e){
+    const name = e.target.username.value;
+    const email = e.target.emailId.value;
+    const phonenumber = e.target.phone.value;
+    const obj = {
+        name,
+        email,
+        phonenumber
+    }
+    if(editing){
+        console.log(obj);
+            axios.put(`https://crudcrud.com/api/b25883dcc3ea4221a32b0ab9f5bab326/appointmentData/${editing}`,obj).then(()=>{
+                e.target.reset();
+                editing=null;
+            })
+        }else{
+        // console.log(name,email,phonenumber);
+        axios.post("https://crudcrud.com/api/b25883dcc3ea4221a32b0ab9f5bab326/appointmentData",obj)
+        .then((response) => { 
+            showUserOnScreen(response.data);
+        })
+        .catch((err)=>{
+            document.body.innerHTML=document.body.innerHTML+"<h4> Something went wrong!</h4>"
+            console.log(err);
+        })
+        // edituser.target.reset();
+        e.target.reset();
+    }
+}
+
+
+ window.addEventListener('DOMContentLoaded',()=>{
+    
+    axios.get('https://crudcrud.com/api/b25883dcc3ea4221a32b0ab9f5bab326/appointmentData')
+    .then((res)=>{
+        // console.log(res)
+        for(var i=0;i<res.data.length;i++){
+            showUserOnScreen(res.data[i])
+        }
+    })
+    .catch((err)=>{
+        console.log(err);
+    })
+    // const localKey = Object.keys(localObj)
+
+    // for(var i=0;i<localKey.length;i++){
+    //     const key = localKey[i];
+    //     const userDetails = localObj[key];
+    //     const userDetailsObj = JSON.parse(userDetails);
+    //     showUserOnScreen(userDetailsObj)
+    // }
+})
+
+function showUserOnScreen(user){
+    //  document.getElementById('userName').value='';
+    //  document.getElementById('email').value='';
+    //  document.getElementById('phoneNumber').value='';
+     
+        // console.log(`'${user.name}'`)
+        // user.preventDefault();
+    const parentNode = document.getElementById('listOfUsers');
+    const childHTML = `<li id=${user._id}>${user.name} - ${user.email} - ${user.phonenumber} <button onclick=deleteUser('${user._id}')>Delete</button>
+            <button onclick=edituser('${user.email}','${user.name}','${user.phonenumber}','${user._id}')>Edit</button></li><br>`
+        parentNode.innerHTML=parentNode.innerHTML+childHTML;
+
+}
+
+function edituser(emailId,name,phonenumber,userId){
+    document.getElementById('userName').value=name;
+    document.getElementById('email').value=emailId;
+    document.getElementById('phoneNumber').value=phonenumber;
+    document.querySelector('button').innerText='Update'
+    editing=userId;
+}
+
+
+function deleteUser(userId){
+   axios.delete(`https://crudcrud.com/api/b25883dcc3ea4221a32b0ab9f5bab326/appointmentData/${userId}`)
+   .then((res)=>{
+       removeUserFromScreen(userId);
+   }).catch((err)=>{
+        console.log(err);
+   })
+}
+
+function removeUserFromScreen(emailId){
+    const parentNode = document.getElementById('listOfUsers')
+    const childNode = document.getElementById(emailId)
+    if(childNode){
+        parentNode.removeChild(childNode)
+    }
+}
+</script>
+</html>
