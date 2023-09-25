@@ -6,7 +6,7 @@
     <title>Document</title>
     </head>
 <body>
-    <form onsubmit="addProducts(event)">
+    <form id="form">
         <label for="price">Price:</label>
         <input type="number" name="pricee" id="price">
         <label for="product">Product:</label>
@@ -14,74 +14,97 @@
         <button type="submit">Add product</button>
     </form>
     <div id="pl">
+        <h5>Total value of Cart:Rs  <span id="total"></span></h5>
         <h3>Product lists</h3>
         <ul id="list">
             
         </ul>
-        <h5>Total value of products:Rs  <span id="total"></span></h5>
     </div>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
- function addProducts(e){
-    const price=e.target.pricee.value;
-    const product=e.target.productt.value;
-    const items={
-        price,
-        product
-    }
-    axios.post('https://crudcrud.com/api/4dd303dbe0de436aa8b0e2c782063e77/products',items)
-    .then((respnse)=>{
-        showItems(respnse);
+  
+    window.addEventListener("DOMContentLoaded",()=>{
+    const productInput = document.getElementById('product')
+    const priceInput = document.getElementById('price')
+    const totalCartValue = document.getElementById('total')
+    const form = document.getElementById('form')
+    const productList = document.getElementById('list')
+     
+    let total=0;
+        
+   form.addEventListener("submit", async (e)=>{
+        e.preventDefault()
+        const price=priceInput.value;
+        const product=productInput.value;
+       if(price===""||product===""){
+        alert("Please fill the required details to add the list")
+        return;
+       }
+        await addListToServer({product,price})
+       e.target.reset()
     })
-    .catch((err)=>{
-        console.error(err)
-    })
+    
 
- }
- window.addEventListener('DOMContentLoaded',()=>{
-    axios.get('https://crudcrud.com/api/4dd303dbe0de436aa8b0e2c782063e77/products')
-    .then((response)=>{
-        for(let i=0;i<response.data.length;i++){
-            showItems(response.data[i])
+    async function addListToServer(list){
+        const apiUrl="https://crudcrud.com/api/a696a9c4ff5d4a00893880504a48941d/productsList"
+        try{
+            const response= await axios.post(apiUrl,list)
+            showItemss(response.data)
+            UpdateTotalCartValue()
+        }catch(err){
+            console.error("Error in adding list to server:",err)
+        }
+    }
+    async function showItems(){
+        productList.innerHTML="";
+     const apiUrl="https://crudcrud.com/api/a696a9c4ff5d4a00893880504a48941d/productsList"
+     try{
+        const response = await axios.get(apiUrl)
+        const list=response.data
+        for(let x of list){
+            showItemss(x)
+        }
+        UpdateTotalCartValue();
+     }catch(err){
+        console.error("Error in get call:",err)
+     }
+    }
+
+    function showItemss(products){
+        const childElement=document.createElement('li')
+        childElement.innerHTML = `
+        <p>Product Name: ${products.product}</p>
+        <p>Product Price: ${products.price} </p>
+        <button class="product-list" data-id="${products._id}" >Delete product</button></li><br>`
+        productList.appendChild(childElement);
+
+        const deleteButton=childElement.querySelector('.product-list')
+        deleteButton.addEventListener("click", async ()=>{
+            await deleteProduct(products._id,childElement)
+        })
+        total+=parseFloat(products.price);
+    }
+
+    async function deleteProduct(productId,item){
+        const apiUrl=`https://crudcrud.com/api/a696a9c4ff5d4a00893880504a48941d/productsList/${productId}`
+        try{
+            await axios.delete(apiUrl)
+            if(item){
+                productList.removeChild(item)
+                const deleteProductPrice=parseFloat(item.querySelector("P:nth-Child(2)").textContent.split(":")[1])
+                total-=deleteProductPrice
+                UpdateTotalCartValue();
             }
-    })
-    .catch((err)=>{
-        console.log(err)
-    })
- })
-   
- var total=0;
- function showItems(products){
-     total+=Number(products.price)
-     const parentElement = document.querySelector('#list')
-     const childElement = `<li id=${products._id}> ${products.price}--${products.product} <button onclick=deleteProduct('${products._id}')>Delete product</button></li><br>`
-     parentElement.innerHTML=parentElement.innerHTML+childElement
-     const parentTotal=document.querySelector('#total')
-     parentTotal.innerHTML=total
-    
- }
+        }catch(err){
+            console.error("Errror in deleteing list from server:",err)
+        }
+}
 
- function deleteProduct(productId){
-    
-    axios.delete(`https://crudcrud.com/api/4dd303dbe0de436aa8b0e2c782063e77/products/${productId}`)
-    .then((res)=>{
-        removeproducts(productId);
-    })
-    .catch((err)=>{
-        console.log(err);
-    })
-    // productId.target.reset();
- }
-
- function removeproducts(ID){
-    const parentNode=document.querySelector('#list');
-    const childNode=document.getElementById(ID);
-    if(childNode){
-        parentNode.removeChild(childNode);
+    function UpdateTotalCartValue(){
+        totalCartValue.textContent=`${total.toFixed(2)}`
     }
-
- }
- 
+ showItems();
+})
 </script>
 </html>
