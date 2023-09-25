@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ekart-Admin-portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="main">
+
+        <h1>Ekart-Admin-portal</h1>
+            <div id="container">
+                    <form id="ProductBucket" onsubmit="">
+                        Enter your product :
+                        <input type="text" id="productInput" name="" placeholder="Enter your product"><br><br>
+                        Enter the price :
+                        <input type="number"    id="priceInput" name="" placeholder="Enter the price"><br><br>
+                        <button>Submit your Form</button><br><br>
+                       <div id="TotalCartValue"></div>
+                    </form>
+                </div>
+                <div id="list">
+                </div>
+    </div>
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.0/axios.min.js"></script>
+<script>
+    window.addEventListener("DOMContentLoaded",()=>{
+        const productInput=document.getElementById("productInput")
+        const priceInput=document.getElementById('priceInput')
+        const productList=document.getElementById('list')
+        const totalCartValue=document.getElementById('TotalCartValue')
+        const productBucket=document.getElementById('ProductBucket')
+        
+        let totalCartAmount=0;
+        
+        productBucket.addEventListener("submit",async (e)=>{
+            e.preventDefault();
+            const product = productInput.value;
+            const price = priceInput.value;
+
+            if(product===""||price===""){
+                alert("Please fill in all required fields.");
+                return;
+            }
+            await addListToServer({product,price});
+           e.target.reset()
+        })
+
+        async function addListToServer(list){
+         const apiUrl = 'https://crudcrud.com/api/38eb2e00675e484db160ab4c8343aeba/productlist'
+         try{
+             const response = await axios.post(apiUrl,list)
+             renderLists(response.data);
+             UpdateTotalCartValue();
+         }catch(err){
+             console.error("Error adding list:",err)
+         }
+         }
+
+        async function renderList(){
+            productList.innerHTML=""
+            const apiUrl="https://crudcrud.com/api/38eb2e00675e484db160ab4c8343aeba/productlist"
+            try{
+                const response = await axios.get(apiUrl)
+                const lists = response.data
+                for(let list of lists){
+                    renderLists(list)
+                }
+                UpdateTotalCartValue();
+
+            }catch(err){
+                console.error("Error while fetching data:",err)
+            }
+        }
+        
+        function renderLists(list){
+            const item = document.createElement("div")
+            item.innerHTML=`
+            <p>Product: ${list.product}</p>
+            <p>Price: ${list.price}</p>
+            <button class="delete-button" data-id="${list._id}">Delete</button>
+            `;
+            productList.appendChild(item)
+            const deleteButton=item.querySelector(".delete-button");
+            deleteButton.addEventListener("click",async ()=>{
+                await deleteList(list._id,item)
+            });
+            totalCartAmount+=parseFloat(list.price)
+        }
+
+
+        async function deleteList(list_Id,element){
+            const apiUrl = `https://crudcrud.com/api/38eb2e00675e484db160ab4c8343aeba/productlist/${list_Id}`;
+            try{
+                await axios.delete(apiUrl)
+                if(element){
+                    productList.removeChild(element)
+                    const deletedProductPrice=parseFloat(element.querySelector("P:nth-child(2)").textContent.split(":")[1]);
+                    totalCartAmount-=deletedProductPrice;
+                    UpdateTotalCartValue();
+                }
+            }catch(err){
+                console.error("Error in deleting list :",err)
+            }
+        }
+
+        function UpdateTotalCartValue(){
+            totalCartValue.textContent=`Total Cart Value: Rs ${totalCartAmount.toFixed(2)}`
+        }
+
+
+        renderList();
+});
+</script>
+</html>
